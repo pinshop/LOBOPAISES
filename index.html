@@ -1173,7 +1173,21 @@
             "peru": "peru", "perú": "peru",
             "paraguay": "paraguay",
             "españa": "espana", "espana": "espana",
-            "puerto rico": "puertorico", "puertorico": "puertorico"
+            "puerto rico": "puertorico", "puertorico": "puertorico",
+            "brasil": "brasil", "brazil": "brasil",
+            "francia": "francia", "france": "francia",
+            "alemania": "alemania", "germany": "alemania",
+            "inglaterra": "inglaterra", "england": "inglaterra",
+            "portugal": "portugal",
+            "holanda": "holanda", "paises bajos": "holanda",
+            "belgica": "belgica", "bélgica": "belgica",
+            "croacia": "croacia",
+            "japon": "japon", "japón": "japon",
+            "corea": "corea", "corea del sur": "corea",
+            "usa": "usa", "estados unidos": "usa", "eeuu": "usa",
+            "canada": "canada", "canadá": "canada",
+            "marruecos": "marruecos",
+            "senegal": "senegal"
         };
         const userCountries = {};
         let teamMVPs = {};
@@ -1183,7 +1197,11 @@
             'chile': 'cl', 'nicaragua': 'ni', 'cuba': 'cu', 'dominicana': 'do',
             'ecuador': 'ec', 'venezuela': 've', 'bolivia': 'bo', 'costarica': 'cr',
             'honduras': 'hn', 'panama': 'pa', 'uruguay': 'uy', 'argentina': 'ar', 'peru': 'pe', 'paraguay': 'py',
-            'espana': 'es', 'puertorico': 'pr'
+            'espana': 'es', 'puertorico': 'pr',
+            'brasil': 'br', 'francia': 'fr', 'alemania': 'de', 'inglaterra': 'gb-eng',
+            'portugal': 'pt', 'holanda': 'nl', 'belgica': 'be', 'croacia': 'hr',
+            'japon': 'jp', 'corea': 'kr', 'usa': 'us', 'canada': 'ca',
+            'marruecos': 'ma', 'senegal': 'sn'
         };
 
         function mostrarAvisoPais(nickname, countryName, profilePic, countryCode) {
@@ -1358,70 +1376,74 @@
             // Compartir live NO suma puntos.
         });
 
-        // === INICIALIZACIÓN BANDERAS ===
-        const leftFlags = ['colombia', 'guatemala', 'mexico', 'salvador', 'chile', 'nicaragua', 'cuba', 'dominicana', 'paraguay', 'espana'];
-        const rightFlags = ['ecuador', 'venezuela', 'bolivia', 'costarica', 'honduras', 'panama', 'uruguay', 'argentina', 'peru', 'puertorico'];
+        // === INICIALIZACIÓN BANDERAS DINÁMICAS ===
+        let countryScores = {};
+        Object.keys(countryIso).forEach(code => countryScores[code] = 0);
 
-        const leftTeamGifts = {
-            'colombia': 'rose',
-            'guatemala': 'tiktok',
-            'mexico': 'pop',
-            'salvador': 'gg',
-            'chile': 'increible',
-            'nicaragua': 'glow',
-            'cuba': 'freestyle',
-            'dominicana': 'oldies',
-            'paraguay': 'friendship',
-            'espana': 'finger'
-        };
-
-        const rightTeamGifts = {
-            'ecuador': 'cake',
-            'venezuela': 'teadoro',
-            'bolivia': 'alas',
-            'costarica': 'blanca',
-            'honduras': 'mazorca',
-            'panama': 'maracas',
-            'uruguay': 'cono',
-            'argentina': 'wink',
-            'peru': 'popular',
-            'puertorico': 'wave'
-        };
-
-        const $leftCol = $("#leftFlagsContainer");
-        const $rightCol = $("#rightFlagsContainer");
-
-        leftFlags.forEach(code => {
-            $leftCol.append(`
+        function createFlagHTML(code, isRight) {
+            return `
         <div class="flag-item" data-code="${code}" id="flag-${code}">
-            <div class="flag-content">
+            <div class="flag-content" ${isRight ? 'style="flex-direction: row-reverse;"' : ''}>
                 <div style="position: relative; display: flex; align-items: center; justify-content: center;">
                     <img src="https://flagcdn.com/w160/${countryIso[code]}.png" alt="${code}">
                     <div class="crown-badge" style="position: absolute; top: -90%; left: 50%; transform: translateX(-50%); font-size: 5vh; text-shadow: 0 0 15px #FFD700, 2px 2px 0 #000, -2px -2px 0 #000; display: none; z-index: 20; pointer-events: none;">👑</div>
-                    <div class="rank-badge" style="position: absolute; top: -15%; left: -15%; width: 2.5vh; height: 2.5vh; border-radius: 50%; font-weight: 900; font-size: 1.5vh; display: none; align-items: center; justify-content: center; z-index: 25; box-shadow: 0 0 5px rgba(0,0,0,0.8);"></div>
+                    <div class="rank-badge" style="position: absolute; top: -15%; ${isRight ? 'right' : 'left'}: -15%; width: 2.5vh; height: 2.5vh; border-radius: 50%; font-weight: 900; font-size: 1.5vh; display: none; align-items: center; justify-content: center; z-index: 25; box-shadow: 0 0 5px rgba(0,0,0,0.8);"></div>
                 </div>
                 <div class="progress-container"><div class="progress-bar"></div></div>
             </div>
             <span class="counter" data-points="0">0</span>
-        </div>
-    `);
-        });
+        </div>`;
+        }
 
-        rightFlags.forEach(code => {
-            $rightCol.append(`
-        <div class="flag-item" data-code="${code}" id="flag-${code}">
-            <div class="flag-content" style="flex-direction: row-reverse;">
-                <div style="position: relative; display: flex; align-items: center; justify-content: center;">
-                    <img src="https://flagcdn.com/w160/${countryIso[code]}.png" alt="${code}">
-                    <div class="crown-badge" style="position: absolute; top: -90%; left: 50%; transform: translateX(-50%); font-size: 5vh; text-shadow: 0 0 15px #FFD700, 2px 2px 0 #000, -2px -2px 0 #000; display: none; z-index: 20; pointer-events: none;">👑</div>
-                    <div class="rank-badge" style="position: absolute; top: -15%; right: -15%; width: 2.5vh; height: 2.5vh; border-radius: 50%; font-weight: 900; font-size: 1.5vh; display: none; align-items: center; justify-content: center; z-index: 25; box-shadow: 0 0 5px rgba(0,0,0,0.8);"></div>
-                </div>
-                <div class="progress-container"><div class="progress-bar"></div></div>
-            </div>
-            <span class="counter" data-points="0">0</span>
-        </div>
-    `);
-        });
+        function updateColumn($col, columnData, isRight) {
+            let currentCodesInCol = new Set();
+            $col.children(".flag-item").each(function() {
+                let c = $(this).attr("data-code");
+                if (!columnData.find(item => item.code === c)) {
+                    $(this).remove(); 
+                } else {
+                    currentCodesInCol.add(c);
+                }
+            });
+            
+            columnData.forEach(item => {
+                if (!currentCodesInCol.has(item.code)) {
+                    $col.append(createFlagHTML(item.code, isRight));
+                }
+            });
+            
+            columnData.forEach(item => {
+                let $flag = $col.find(`#flag-${item.code}`);
+                let goals = Math.floor(item.score / 10);
+                let remainder = item.score % 10;
+                
+                $flag.find(".counter").attr("data-points", item.score).text(goals);
+                $flag.find(".progress-bar").css("height", (remainder * 10) + "%");
+            });
+            
+            sortFlagsContainer($col, columnData);
+        }
+
+        function renderTopCountries() {
+            let sorted = Object.keys(countryScores).map(code => {
+                return { code: code, score: countryScores[code] };
+            });
+            
+            sorted.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                return a.code.localeCompare(b.code); // Tie breaker alphabetico
+            });
+            
+            let top14 = sorted.slice(0, 14);
+            let left7 = top14.slice(0, 7);
+            let right7 = top14.slice(7, 14);
+            
+            updateColumn($("#leftFlagsContainer"), left7, false);
+            updateColumn($("#rightFlagsContainer"), right7, true);
+            
+            checkLeader();
+        }
+
 
         // Hacer dragging de las banderas
         $("#leftFlagsContainer, #rightFlagsContainer").draggable({ handle: "img" });
@@ -1580,18 +1602,16 @@
             setTimeout(() => {
                 $podio.fadeOut(1000, function () {
                     $(this).remove();
-                    $(".flag-item .counter").text("0").attr("data-points", "0");
-                    $(".flag-item .progress-bar").css("height", "0%");
+                    Object.keys(countryScores).forEach(code => countryScores[code] = 0);
                     teamMVPs = {};
-                    checkLeader();
+                    renderTopCountries();
                     iniciarTemporizadorGlobal(); // Reinicia auto-contador
                 });
             }, 10000);
         }
 
         function addPointToFlag(code, amount = 1, profilePic = null, nickname = null) {
-            const $flag = $(`#flag-${code}`);
-            if ($flag.length === 0) return;
+            if (typeof countryScores[code] === 'undefined') return;
 
             if (nickname) {
                 if (!teamMVPs[code]) teamMVPs[code] = {};
@@ -1599,33 +1619,21 @@
                 teamMVPs[code][nickname] += amount;
             }
 
-            const $counter = $flag.find(".counter");
-            const $progressBar = $flag.find(".progress-bar");
-            
-            let currentPoints = parseInt($counter.attr("data-points"), 10) || 0;
-            currentPoints += amount;
-            $counter.attr("data-points", currentPoints);
+            countryScores[code] += amount;
+            renderTopCountries();
 
-            let goals = Math.floor(currentPoints / 10);
-            let remainder = currentPoints % 10;
+            const $flag = $(`#flag-${code}`);
+            if ($flag.length > 0) {
+                const $counter = $flag.find(".counter");
+                $counter.css("transform", "scale(1.5)");
+                setTimeout(() => $counter.css("transform", "scale(1)"), 200);
 
-            $counter.text(goals);
-            $progressBar.css("height", (remainder * 10) + "%");
-
-            $counter.css("transform", "scale(1.5)");
-            setTimeout(() => $counter.css("transform", "scale(1)"), 200);
-
-            spawnParticles($flag);
-            
-            if (profilePic) {
-                spawnProfileAnimation($flag, profilePic);
+                spawnParticles($flag);
+                
+                if (profilePic) {
+                    spawnProfileAnimation($flag, profilePic);
+                }
             }
-
-            // Reordenar contenedor
-            const $container = $flag.closest('.flags-container');
-            sortFlagsContainer($container);
-            
-            checkLeader();
         }
 
         function spawnProfileAnimation($flag, profilePic) {
@@ -1676,51 +1684,35 @@
             });
         }
 
-        function sortFlagsContainer($container) {
+        function sortFlagsContainer($container, sortedData) {
             const $items = $container.children(".flag-item");
             if ($items.length <= 1) return;
 
-            // 1. Guardar posiciones actuales
             const firstPositions = {};
             $items.each(function() {
                 firstPositions[$(this).attr("data-code")] = this.getBoundingClientRect().top;
             });
 
-            // 2. Ordenar en DOM por puntos descendente
-            $items.sort((a, b) => {
-                const ptsA = parseInt($(a).find(".counter").attr("data-points"), 10) || 0;
-                const ptsB = parseInt($(b).find(".counter").attr("data-points"), 10) || 0;
-                return ptsB - ptsA;
+            // Order DOM elements exactly as sortedData
+            sortedData.forEach(item => {
+                let $el = $container.find(`#flag-${item.code}`);
+                if($el.length) $container.append($el);
             });
-            $container.append($items);
 
-            // 3. Animar con FLIP
-            $items.each(function() {
+            $container.children(".flag-item").each(function() {
                 const code = $(this).attr("data-code");
                 const firstTop = firstPositions[code];
+                if (firstTop === undefined) return;
+                
                 const lastTop = this.getBoundingClientRect().top;
                 const invert = firstTop - lastTop;
                 
                 if (invert !== 0) {
-                    // Mover a posición antigua sin transición
-                    $(this).css({
-                        transition: 'none',
-                        transform: `translateY(${invert}px)`
-                    });
-
-                    // Forzar reflow
+                    $(this).css({ transition: 'none', transform: `translateY(${invert}px)` });
                     this.offsetHeight;
-
-                    // Mover a nueva posición con transición
-                    $(this).css({
-                        transition: 'transform 0.5s ease-in-out',
-                        transform: 'translateY(0)'
-                    });
+                    $(this).css({ transition: 'transform 0.5s ease-in-out', transform: 'translateY(0)' });
                 } else {
-                    $(this).css({
-                        transition: 'none',
-                        transform: 'translateY(0)'
-                    });
+                    $(this).css({ transition: 'none', transform: 'translateY(0)' });
                 }
             });
         }
@@ -1765,10 +1757,10 @@
         }
 
         function addRandomPoint() {
-            const flags = $(".flag-item");
+            const flags = Object.keys(countryScores);
             if (flags.length === 0) return;
             const randomIdx = Math.floor(Math.random() * flags.length);
-            const code = $(flags[randomIdx]).attr("data-code");
+            const code = flags[randomIdx];
             addPointToFlag(code);
         }
 
@@ -1904,6 +1896,7 @@
 
         // Auto-conectar y Modo Transparente (si viene por URL)
         $(document).ready(() => {
+            renderTopCountries();
             iniciarTemporizadorGlobal(); // Iniciar contador automáticamente
             $("#leftFlagsContainer, #rightFlagsContainer").css("transform", `scale(0.85)`);
 

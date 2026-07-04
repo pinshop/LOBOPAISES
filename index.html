@@ -1024,18 +1024,18 @@
                 const snapshot = await db.ref(`licenses/${user}`).once('value');
                 let data = snapshot.val();
                 if (!data) {
-                    data = { tokens: 0, limit: 35000, blocked: false };
+                    data = { tokens: 0, limit: 99999999, blocked: false };
                     db.ref(`licenses/${user}`).set(data);
                 }
                 
-                $("#tokenBarContainer").css("display", "inline-block");
+                $("#tokenBarContainer").css("display", "inline-block"); // Si quieres ocultarlo, puedes poner "none"
                 
                 // Escuchar cambios en tiempo real
                 db.ref(`licenses/${user}`).on('value', (snap) => {
                     let d = snap.val();
                     if(d) {
                         currentTokens = d.tokens || 0;
-                        tokenLimit = d.limit || 35000;
+                        tokenLimit = 99999999;
                         $("#currentTokenText").text(currentTokens.toLocaleString());
                         $("#limitTokenText").text(tokenLimit.toLocaleString());
                         
@@ -1173,15 +1173,17 @@
         });
 
         // DETECCIÓN DE REGALOS (manejo robusto de ráfagas/progresivo)
-        const giftPoints = {
-            5655: 1, 7096: 1, 15231: 1, 15232: 1, 5269: 1, 7032: 1, 15933: 1, 5827: 1, 8239: 1,
-            5487: 5, 15100: 5,
-            9947: 10,
-            7934: 20, 5658: 20,
-            14488: 32, 5879: 30,
-            5582: 120, 12988: 120, 5660: 120, 6427: 100, 7569: 120,
-            11046: 1200, 7168: 520
-        };
+        const giftPoints = {};
+        
+        fetch('gifts completo.json')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(gift => {
+                    giftPoints[gift.id] = parseInt(gift.valor, 10) || 0;
+                });
+                console.log("Cargados " + data.length + " regalos desde JSON");
+            })
+            .catch(err => console.error("Error loading gifts completo.json:", err));
         const giftProgress = {};
 
         const giftToTeam = {};

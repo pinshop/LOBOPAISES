@@ -429,17 +429,31 @@
             animation: lavaPulse 1s infinite alternate;
         }
 
+        @keyframes shineCrown {
+            0% { filter: drop-shadow(0 0 5px #FFD700) brightness(1); transform: translateX(-50%) scale(1); }
+            50% { filter: drop-shadow(0 0 20px #FFF) brightness(1.5); transform: translateX(-50%) scale(1.3) rotate(10deg); }
+            100% { filter: drop-shadow(0 0 5px #FFD700) brightness(1); transform: translateX(-50%) scale(1); }
+        }
+
+        .crown-badge {
+            animation: shineCrown 1.5s infinite ease-in-out !important;
+        }
+
         /* NUEVOS ESTILOS */
         .aviso-pais {
-            color: yellow;
-            font-size: 1.4vh;
-            font-weight: 900;
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px 15px;
-            border-radius: 50px;
-            animation: slideUp 0.5s forwards;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 8px 12px;
+            color: white;
+            font-family: sans-serif;
+            animation: slideLeft 0.5s forwards;
             pointer-events: none;
+            min-width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            zoom: 0.5;
         }
 
         .aviso-pais.fade-out {
@@ -447,14 +461,51 @@
             transition: opacity 1s;
         }
 
-        @keyframes slideUp {
+        .aviso-pais img.aviso-profile {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+
+        .aviso-text {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            margin-right: 10px;
+            text-shadow: none;
+            text-align: left;
+        }
+
+        .aviso-text .aviso-name {
+            font-size: 11px;
+            color: #ddd;
+            margin-bottom: 2px;
+            font-weight: normal;
+        }
+
+        .aviso-text .aviso-country {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .aviso-pais img.aviso-flag {
+            width: 30px;
+            height: 20px;
+            border-radius: 3px;
+            object-fit: cover;
+        }
+
+        @keyframes slideLeft {
             from {
-                transform: translateY(20px);
+                transform: translateX(100%);
                 opacity: 0;
             }
 
             to {
-                transform: translateY(0);
+                transform: translateX(0);
                 opacity: 1;
             }
         }
@@ -464,14 +515,12 @@
             color: white;
             font-size: 6vh;
             font-weight: 900;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border-radius: 15px;
-            border: 2px solid white;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
             z-index: 40;
             cursor: move;
             user-select: none;
+            background: transparent;
+            border: none;
+            box-shadow: none;
         }
 
         /* PODIO */
@@ -626,10 +675,10 @@
 
         .trembling-red {
             color: #FF0000 !important;
-            text-shadow: 0 0 20px #FF0000, 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000 !important;
+            text-shadow: 0 0 20px #FF0000 !important;
             animation: tremble 0.1s infinite !important;
-            border-color: #FF0000 !important;
-            box-shadow: 0 0 30px #FF0000 !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
         }
     </style>
 </head>
@@ -679,7 +728,7 @@
         <div id="rightFlagsContainer" class="flags-container draggable-item"></div>
 
         <div id="avisoContainer" class="draggable-item"
-            style="position: absolute; bottom: 15%; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: move;">
+            style="position: absolute; bottom: 5%; right: 2%; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; cursor: move;">
         </div>
 
         <div class="bottom-info">
@@ -1137,9 +1186,20 @@
             'espana': 'es', 'puertorico': 'pr'
         };
 
-        function mostrarAvisoPais(nickname, countryName) {
-            const $aviso = $('<div class="aviso-pais"></div>');
-            $aviso.html(`<b>${nickname}</b> se ha unido a <b>${countryName.toUpperCase()}</b>`);
+        function mostrarAvisoPais(nickname, countryName, profilePic, countryCode) {
+            const flagUrl = `https://flagcdn.com/w160/${countryIso[countryCode]}.png`;
+            const pic = profilePic || "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+            
+            const $aviso = $(`
+                <div class="aviso-pais">
+                    <img class="aviso-profile" src="${pic}" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'">
+                    <div class="aviso-text">
+                        <span class="aviso-name">${nickname} joined</span>
+                        <span class="aviso-country">${countryName.charAt(0).toUpperCase() + countryName.slice(1)}</span>
+                    </div>
+                    <img class="aviso-flag" src="${flagUrl}">
+                </div>
+            `);
             $("#avisoContainer").append($aviso);
 
             setTimeout(() => {
@@ -1166,7 +1226,7 @@
             for (const [name, code] of Object.entries(countryMap)) {
                 if (text.includes(name)) {
                     userCountries[data.uniqueId] = code;
-                    mostrarAvisoPais(data.nickname, name);
+                    mostrarAvisoPais(data.nickname, name, data.profilePictureUrl, code);
                     break;
                 }
             }
@@ -1337,7 +1397,7 @@
             <div class="flag-content">
                 <div style="position: relative; display: flex; align-items: center; justify-content: center;">
                     <img src="https://flagcdn.com/w160/${countryIso[code]}.png" alt="${code}">
-                    <div class="crown-badge" style="position: absolute; top: -35%; left: 50%; transform: translateX(-50%); font-size: 5vh; text-shadow: 0 0 15px #FFD700, 2px 2px 0 #000, -2px -2px 0 #000; display: none; z-index: 20; pointer-events: none;">👑</div>
+                    <div class="crown-badge" style="position: absolute; top: -90%; left: 50%; transform: translateX(-50%); font-size: 5vh; text-shadow: 0 0 15px #FFD700, 2px 2px 0 #000, -2px -2px 0 #000; display: none; z-index: 20; pointer-events: none;">👑</div>
                     <div class="rank-badge" style="position: absolute; top: -15%; left: -15%; width: 2.5vh; height: 2.5vh; border-radius: 50%; font-weight: 900; font-size: 1.5vh; display: none; align-items: center; justify-content: center; z-index: 25; box-shadow: 0 0 5px rgba(0,0,0,0.8);"></div>
                 </div>
                 <div class="progress-container"><div class="progress-bar"></div></div>
@@ -1353,7 +1413,7 @@
             <div class="flag-content" style="flex-direction: row-reverse;">
                 <div style="position: relative; display: flex; align-items: center; justify-content: center;">
                     <img src="https://flagcdn.com/w160/${countryIso[code]}.png" alt="${code}">
-                    <div class="crown-badge" style="position: absolute; top: -35%; left: 50%; transform: translateX(-50%); font-size: 5vh; text-shadow: 0 0 15px #FFD700, 2px 2px 0 #000, -2px -2px 0 #000; display: none; z-index: 20; pointer-events: none;">👑</div>
+                    <div class="crown-badge" style="position: absolute; top: -90%; left: 50%; transform: translateX(-50%); font-size: 5vh; text-shadow: 0 0 15px #FFD700, 2px 2px 0 #000, -2px -2px 0 #000; display: none; z-index: 20; pointer-events: none;">👑</div>
                     <div class="rank-badge" style="position: absolute; top: -15%; right: -15%; width: 2.5vh; height: 2.5vh; border-radius: 50%; font-weight: 900; font-size: 1.5vh; display: none; align-items: center; justify-content: center; z-index: 25; box-shadow: 0 0 5px rgba(0,0,0,0.8);"></div>
                 </div>
                 <div class="progress-container"><div class="progress-bar"></div></div>
@@ -1383,10 +1443,10 @@
             let $timerDiv = $("#globalAutoTimer");
             if ($timerDiv.length === 0) {
                 // UI del timer global
-                $timerDiv = $('<div id="globalAutoTimer" class="custom-timer draggable-item" style="cursor: move; box-shadow: 0 0 20px #FFD700; border: 3px solid white; z-index: 50; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;"></div>');
-                $("body").append($timerDiv);
+                $timerDiv = $('<div id="globalAutoTimer" class="custom-timer draggable-item" style="cursor: move; z-index: 50; text-shadow: none;"></div>');
+                $("#zona").append($timerDiv);
                 $timerDiv.draggable();
-                $timerDiv.css({ bottom: '2%', top: 'auto', left: '50%', transform: 'translateX(-50%)', fontSize: '3.5vh', padding: '5px 15px' });
+                $timerDiv.css({ top: '5%', bottom: 'auto', left: '50%', transform: 'translateX(-50%)', fontSize: '3.5vh', padding: '5px 15px' });
             }
             $timerDiv.text(formatTime(globalTimerSeconds));
             $timerDiv.removeClass("trembling-red");
@@ -1693,14 +1753,14 @@
                 if (pts > max) {
                     max = pts;
                     leaderFlags = [el];
-                } else if (pts === max && max > 0) {
-                    leaderFlags.push(el);
                 }
             });
 
             $(".flag-item").removeClass("leader-flag");
+            $(".crown-badge").hide();
             if (max > 0) {
                 $(leaderFlags).addClass("leader-flag");
+                $(leaderFlags).find(".crown-badge").show();
             }
         }
 
@@ -1874,7 +1934,7 @@
                 mostrarPodio();
             }
             if (e.key === "1") addRandomPoint();
-            if (e.key === "2") mostrarAvisoPais("TEST_USER", "colombia");
+            if (e.key === "2") mostrarAvisoPais("TEST_USER", "colombia", "https://picsum.photos/50", "colombia");
         });
     </script>
 </body>

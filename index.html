@@ -836,7 +836,7 @@
             }
 
             normalizeEvent(eventName, data, eventId) {
-                const uniqueId = data.uniqueId || data.username || data.user || data.userName || "";
+                const uniqueId = data.uniqueId || data.unique_id || data.userId || data.user_id || data.username || data.user || data.userName || data.nickname || data.nickName || "";
                 const nickname = data.nickname || data.nickName || uniqueId || "Usuario";
                 const profilePictureUrl = data.profilePictureUrl || data.profilePic || data.avatar || "";
 
@@ -1190,7 +1190,8 @@
             "senegal": "senegal"
         };
         const userCountries = {};
-        let teamMVPs = {};
+        let teamMVPs = {}; // code -> nickname -> points
+        let userProfiles = {}; // nickname -> pic
 
         const countryIso = {
             'colombia': 'co', 'guatemala': 'gt', 'mexico': 'mx', 'salvador': 'sv',
@@ -1244,6 +1245,7 @@
             for (const [name, code] of Object.entries(countryMap)) {
                 if (text.includes(name)) {
                     userCountries[data.uniqueId] = code;
+                    userProfiles[data.nickname] = data.profilePictureUrl;
                     mostrarAvisoPais(data.nickname, name, data.profilePictureUrl, code);
                     break;
                 }
@@ -1543,7 +1545,8 @@
             $(".flag-item").each(function () {
                 const code = $(this).attr("data-code");
                 const pts = parseInt($(this).find(".counter").attr("data-points"), 10) || 0;
-                const goals = parseInt($(this).find(".counter").text(), 10) || 0;
+                // Calculamos goles a partir de los puntos exactos.
+                const goals = Math.floor(pts / 10);
                 scores.push({ code, pts, goals });
             });
 
@@ -1575,20 +1578,28 @@
                 if (place === 3) { height = '10vh'; color = '#CD7F32'; }
 
                 let mvpName = "Nadie";
+                let mvpPic = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                 if (teamMVPs[entry.code]) {
                     const sortedMvps = Object.entries(teamMVPs[entry.code]).sort((a, b) => b[1] - a[1]);
-                    if (sortedMvps.length > 0) mvpName = sortedMvps[0][0];
+                    if (sortedMvps.length > 0) {
+                        mvpName = sortedMvps[0][0];
+                        if (userProfiles[mvpName]) mvpPic = userProfiles[mvpName];
+                    }
                 }
 
+                // Colores para el borde de la foto según el puesto
+                let borderColor = '#C0C0C0';
+                if (place === 1) borderColor = '#FFD700';
+                if (place === 3) borderColor = '#CD7F32';
+
                 const $col = $(`
-            <div class="podio-col ${animationClasses[idx]}">
-                <span style="font-size:4vh; font-weight:bold; color:white; text-shadow: 2px 2px 0 #000; text-align:center;">${entry.goals}<br>Goles</span>
-                <img src="https://flagcdn.com/w160/${countryIso[entry.code]}.png" style="width:8vh; border-radius:4px; margin: 1vh 0; box-shadow: 0 0 10px rgba(0,0,0,0.8);">
-                <div style="width:10vh; height:${height}; background:${color}; display:flex; justify-content:center; align-items:center; font-size:6vh; font-weight:900; color:black; border-radius:10px 10px 0 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.3);">
-                    ${place}°
-                </div>
-                <div style="margin-top: 1vh; font-size: 1.5vh; font-weight: bold; color: #FFD700; text-shadow: 1px 1px 2px black; text-align: center; max-width: 10vh; word-wrap: break-word;">
-                    👑 MVP<br>${mvpName}
+            <div class="podio-col ${animationClasses[idx]}" style="gap: 1vh;">
+                <div style="background: white; color: black; border-radius: 50%; width: 3.5vh; height: 3.5vh; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 2.2vh; box-shadow: 0 0 10px rgba(0,0,0,0.8);">${place}</div>
+                <img src="https://flagcdn.com/w160/${countryIso[entry.code]}.png" style="width:14vh; height: 8.4vh; object-fit: cover; border-radius:8px; border: 3px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.8);">
+                <div style="font-size:7vh; font-weight:900; color:white; text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000; margin: 0.5vh 0; ${place === 1 ? 'color: #FFD700;' : ''}">${entry.goals}</div>
+                <img src="${mvpPic}" style="width: 8vh; height: 8vh; border-radius: 50%; border: 4px solid ${borderColor}; box-shadow: 0 0 15px rgba(0,0,0,0.8); object-fit: cover;">
+                <div style="font-size: 2.2vh; font-weight: bold; color: white; text-shadow: 2px 2px 4px black; text-align: center; max-width: 16vh; word-wrap: break-word;">
+                    ${mvpName}
                 </div>
             </div>
         `);
@@ -1617,6 +1628,7 @@
                 if (!teamMVPs[code]) teamMVPs[code] = {};
                 if (!teamMVPs[code][nickname]) teamMVPs[code][nickname] = 0;
                 teamMVPs[code][nickname] += amount;
+                if (profilePic) userProfiles[nickname] = profilePic;
             }
 
             countryScores[code] += amount;

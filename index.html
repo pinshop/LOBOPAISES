@@ -301,8 +301,8 @@
         /* BANDERAS */
         .flags-container {
             position: absolute;
-            top: 5%;
-            height: 90%;
+            top: 13%;
+            height: 85%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -1358,12 +1358,7 @@
             let previousLikes = userLikes[data.uniqueId] || 0;
             let newLikes = previousLikes + data.likeCount;
 
-            // Sum 1 point per 100 taps
-            let newPoints = Math.floor(newLikes / 100) - Math.floor(previousLikes / 100);
-
-            if (newPoints > 0) {
-                addPointToFlag(code, newPoints, data.profilePictureUrl, data.nickname);
-            }
+            // Funcionalidad de suma por tap taps eliminada
             userLikes[data.uniqueId] = newLikes;
         });
 
@@ -1417,14 +1412,16 @@
             columnData.forEach(item => {
                 let $flag = $col.find(`#flag-${item.code}`);
                 let goals = Math.floor(item.score / 10);
-                let remainder = item.score % 10;
+                let progress = (item.score % 10) * 10;
                 
                 $flag.find(".counter").attr("data-points", item.score).text(goals);
-                $flag.find(".progress-bar").css("height", (remainder * 10) + "%");
+                $flag.find(".progress-bar").css("height", progress + "%");
             });
             
             sortFlagsContainer($col, columnData);
         }
+
+        const defaultCountries = ['colombia', 'mexico', 'argentina', 'peru', 'chile', 'ecuador', 'venezuela', 'guatemala', 'honduras', 'salvador', 'nicaragua', 'costarica'];
 
         function renderTopCountries() {
             let sorted = Object.keys(countryScores).map(code => {
@@ -1433,15 +1430,18 @@
             
             sorted.sort((a, b) => {
                 if (b.score !== a.score) return b.score - a.score;
-                return a.code.localeCompare(b.code); // Tie breaker alphabetico
+                let aIsDefault = defaultCountries.includes(a.code) ? 1 : 0;
+                let bIsDefault = defaultCountries.includes(b.code) ? 1 : 0;
+                if (bIsDefault !== aIsDefault) return bIsDefault - aIsDefault;
+                return a.code.localeCompare(b.code);
             });
             
-            let top14 = sorted.slice(0, 14);
-            let left7 = top14.slice(0, 7);
-            let right7 = top14.slice(7, 14);
+            let top12 = sorted.slice(0, 12);
+            let left6 = top12.slice(0, 6);
+            let right6 = top12.slice(6, 12);
             
-            updateColumn($("#leftFlagsContainer"), left7, false);
-            updateColumn($("#rightFlagsContainer"), right7, true);
+            updateColumn($("#leftFlagsContainer"), left6, false);
+            updateColumn($("#rightFlagsContainer"), right6, true);
             
             checkLeader();
         }
@@ -1470,7 +1470,7 @@
                 $timerDiv = $('<div id="globalAutoTimer" class="custom-timer draggable-item" style="cursor: move; z-index: 50; text-shadow: none;"></div>');
                 $("#zona").append($timerDiv);
                 $timerDiv.draggable();
-                $timerDiv.css({ top: '5%', bottom: 'auto', left: '50%', transform: 'translateX(-50%)', fontSize: '3.5vh', padding: '5px 15px' });
+                $timerDiv.css({ top: '13%', bottom: 'auto', left: '50%', transform: 'translateX(-50%)', fontSize: '3.5vh', padding: '5px 15px' });
             }
             $timerDiv.text(formatTime(globalTimerSeconds));
             $timerDiv.removeClass("trembling-red");
@@ -1690,7 +1690,7 @@
                     width: '1vh',
                     height: '1vh',
                     opacity: 0
-                }, 1300, function() {
+                }, 2500, function() {
                     $img.remove();
                 });
             });
